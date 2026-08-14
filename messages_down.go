@@ -26,10 +26,16 @@ type HelloErr struct {
 }
 
 // Ticket identifies the work item a task came from.
+//
+// Title and Body carry the ticket's text, because the Runner has no connector
+// to the task manager: it holds the repository credential, not the Jira or
+// Linear one. Cloud reads the ticket and sends what the agent has to act on.
 type Ticket struct {
 	Provider string `json:"provider"`
 	ID       string `json:"id"`
 	URL      string `json:"url,omitempty"`
+	Title    string `json:"title,omitempty"`
+	Body     string `json:"body,omitempty"`
 }
 
 // TaskRun starts a task. With concurrency at 1, a TaskRun arriving while a

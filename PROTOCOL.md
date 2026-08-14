@@ -75,7 +75,7 @@
 | type | призначення | ключові поля `data` |
 |---|---|---|
 | `hello.ok` / `hello.err` | handshake | див. §3 |
-| `task.run` | запустити задачу | `taskId`, `ticket:{provider,id,url}`, `repo`, `budgetUsd?`, `timeoutMs?` |
+| `task.run` | запустити задачу | `taskId`, `ticket:{provider,id,url?,title?,body?}`, `repo`, `budgetUsd?`, `timeoutMs?` |
 | `task.cancel` | зупинити задачу (вбити sandbox) | `taskId`, `reason` |
 | `task.approve` | апрув кроку (human-in-the-loop) | `taskId`, `stepId`, `approved: bool` |
 | `repo.prepare` | клонувати/оновити репу | `url`, `branch?` |
