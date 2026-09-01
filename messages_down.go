@@ -87,6 +87,13 @@ const (
 // Managed mode only. In the default Local mode the developer sets values on the
 // VPS themselves and this message is never sent at all. Even in Managed mode
 // Value is relay-only: Cloud passes it down and must neither persist nor log it.
+//
+// An empty Value clears the slot, which is how a revoked token is taken out of
+// use without shell access to the VPS.
+//
+// There is no acknowledgement message: a Runner that took the value answers
+// with a fresh CredStatus, and one that refused it answers with an Error. The
+// flags are the only thing Cloud is entitled to know either way.
 type CredSet struct {
 	Key   CredKey `json:"key"`
 	Value string  `json:"value"`

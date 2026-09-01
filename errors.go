@@ -19,6 +19,10 @@ const (
 	// ErrCredMissing means a credential the task needs is not configured on the
 	// VPS.
 	ErrCredMissing ErrorCode = "CRED_MISSING"
+	// ErrCredRefused means the Runner will not take a credential pushed down the
+	// channel: Managed mode is off, or a task is running and would see the
+	// change halfway through.
+	ErrCredRefused ErrorCode = "CRED_REFUSED"
 	// ErrInternal is an unexpected failure on the sending side.
 	ErrInternal ErrorCode = "INTERNAL"
 )
