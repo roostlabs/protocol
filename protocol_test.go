@@ -167,6 +167,28 @@ func TestCredSetNeverLogsValue(t *testing.T) {
 	}
 }
 
+// The mode is additive, so a Runner built before it existed still decodes and
+// simply reports no mode. Cloud reads that as Local, which is the safe default:
+// it offers no input rather than pushing a secret at a Runner that would refuse
+// it.
+func TestCredStatusModeIsOptional(t *testing.T) {
+	var old CredStatus
+	if err := json.Unmarshal([]byte(`{"git":true,"taskManager":false,"llm":true}`), &old); err != nil {
+		t.Fatalf("unmarshal an older cred.status: %v", err)
+	}
+	if old.Mode != "" {
+		t.Errorf("mode = %q, want empty", old.Mode)
+	}
+
+	wire, err := json.Marshal(CredStatus{Git: true, Mode: CredModeManaged})
+	if err != nil {
+		t.Fatalf("marshal CredStatus: %v", err)
+	}
+	if !bytes.Contains(wire, []byte(`"mode":"managed"`)) {
+		t.Errorf("JSON dropped the mode: %s", wire)
+	}
+}
+
 func TestHelloNeverLogsToken(t *testing.T) {
 	const token = "rt_secrettoken"
 	hello := Hello{

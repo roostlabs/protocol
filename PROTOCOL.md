@@ -63,7 +63,7 @@
 | `task.event` | подія трейсу виконання (append-only) | `event: stage\|agent_step\|cmd_start\|cmd_output\|cmd_exit\|llm_call\|pr\|error` + payload події |
 | `task.state` | зміна стану задачі | `state: queued\|preparing\|running\|awaiting_approval\|done\|failed\|cancelled`, `reason?` |
 | `task.result` | фінал задачі | `prUrl?`, `costUsd`, `tokens:{in,out}`, `durationMs` |
-| `cred.status` | які креди налаштовані (тільки прапорці!) | `{git:true, taskManager:false, llm:true}` |
+| `cred.status` | які креди налаштовані (тільки прапорці!) + режим | `{git:true, taskManager:false, llm:true, mode: local\|managed}` |
 | `repo.status` | стан підготовлених реп | `[{repo, branch, lastFetch, dirty}]` |
 | `chat` | повідомлення від агента до дева | `taskId`, `text` |
 | `query.result` | відповідь на `query` від Cloud | `queryId`, `ok`, `data\|error` |
@@ -79,7 +79,7 @@
 | `task.cancel` | зупинити задачу (вбити sandbox) | `taskId`, `reason` |
 | `task.approve` | апрув кроку (human-in-the-loop) | `taskId`, `stepId`, `approved: bool` |
 | `repo.prepare` | клонувати/оновити репу | `url`, `branch?` |
-| `cred.set` | **тільки Managed-режим**: записати кред у локальний конфіг | `key: git\|taskManager\|llm`, `value` (relay-only, не логується) |
+| `cred.set` | **тільки Managed-режим**: записати кред у локальний конфіг | `key: git\|taskManager\|llm`, `value` (relay-only, не логується; порожній = стерти слот) |
 | `chat` | повідомлення від дева до агента | `taskId`, `text` |
 | `query` | одноразовий запит (історія, диск, конфіг) | `queryId`, `what: task_history\|task_trace\|disk_usage\|config`, `params` |
 | `subscribe` / `unsubscribe` | вкл/викл потік `metrics` (щоб не слати даремно) | `stream: metrics` |
@@ -98,7 +98,11 @@
 { "v":1, "type":"error", "data":{ "code":"TASK_NOT_FOUND", "ref":"<id повідомлення-причини>", "msg":"..." } }
 ```
 
-Коди: `AUTH_FAILED`, `UNSUPPORTED_VERSION`, `TASK_NOT_FOUND`, `BUSY` (concurrency=1, задача в черзі), `BUDGET_EXCEEDED`, `CRED_MISSING`, `INTERNAL`.
+Коди: `AUTH_FAILED`, `UNSUPPORTED_VERSION`, `TASK_NOT_FOUND`, `BUSY` (concurrency=1, задача в черзі), `BUDGET_EXCEEDED`, `CRED_MISSING`, `CRED_REFUSED` (Runner не бере кред із каналу: Local-режим або задача в роботі), `INTERNAL`.
+
+На `cred.set` окремого ack немає: Runner, що взяв значення, відповідає новим
+`cred.status`; Runner, що відмовив, — `error` з `CRED_REFUSED`. Прапорці —
+єдине, що Cloud має право знати в обох випадках.
 
 ## 8. Версіонування протоколу
 

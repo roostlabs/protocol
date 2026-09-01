@@ -195,13 +195,30 @@ type TaskResult struct {
 	DurationMs int64   `json:"durationMs"`
 }
 
+// CredMode says where credential values come from.
+//
+// Local is the default and the recommendation: the developer sets values on the
+// VPS and Cloud only ever learns whether a slot is filled. Managed is opt-in and
+// means the developer accepts typing values into the dashboard, from where they
+// are relayed down the channel — a transit Local never performs at all.
+type CredMode string
+
+const (
+	CredModeLocal   CredMode = "local"
+	CredModeManaged CredMode = "managed"
+)
+
 // CredStatus reports which credentials are configured — flags only. Values live
 // on the VPS and never travel up this channel, which is the whole point of the
 // design.
+//
+// Mode is here because the dashboard cannot infer it: whether it may offer an
+// input for a credential is the Runner's decision, not Cloud's.
 type CredStatus struct {
-	Git         bool `json:"git"`
-	TaskManager bool `json:"taskManager"`
-	LLM         bool `json:"llm"`
+	Git         bool     `json:"git"`
+	TaskManager bool     `json:"taskManager"`
+	LLM         bool     `json:"llm"`
+	Mode        CredMode `json:"mode,omitempty"`
 }
 
 // RepoStatus lists the persistent working copies on the VPS. Repos are cloned
