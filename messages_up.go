@@ -84,6 +84,7 @@ const (
 	EventLLMCall   EventKind = "llm_call"
 	EventPR        EventKind = "pr"
 	EventError     EventKind = "error"
+	EventTicket    EventKind = "ticket"
 )
 
 // TaskEvent is one entry of the append-only task trace.
@@ -97,6 +98,20 @@ const (
 type TaskEvent struct {
 	Event   EventKind       `json:"event"`
 	Payload json.RawMessage `json:"payload,omitempty"`
+}
+
+// TicketPayload records which work item the task is for, as the Runner knows it
+// once the ticket has been read. It is the first event of a task that has a
+// ticket, and it is how Cloud learns about a task the Runner started on its own
+// — one picked up by polling the tracker — which no task.run ever described.
+//
+// No Body: the description can be long and is the agent's input, not the
+// dashboard's. The url is what a reader clicks to see it.
+type TicketPayload struct {
+	Provider string `json:"provider"`
+	ID       string `json:"id"`
+	URL      string `json:"url,omitempty"`
+	Title    string `json:"title,omitempty"`
 }
 
 // StagePayload marks entry into a coarse phase of the task, such as preparing
