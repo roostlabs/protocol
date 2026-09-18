@@ -257,6 +257,52 @@ type Chat struct {
 	Text   string `json:"text"`
 }
 
+// TaskHistoryEntry is one task as the Runner's journal knows it: the answer to
+// a task_history query is a list of these, most recently active first.
+//
+// This is how Cloud learns about tasks it never saw finish — or never saw at
+// all, when the Runner picked a ticket up while Cloud was unreachable. Replay
+// after a reconnect covers only tasks Cloud already holds; history covers the
+// rest, on demand.
+type TaskHistoryEntry struct {
+	TaskID string     `json:"taskId"`
+	State  TaskStatus `json:"state,omitempty"`
+	Reason string     `json:"reason,omitempty"`
+	// Result is set once the task has finished.
+	Result *TaskResult `json:"result,omitempty"`
+	// Ticket is what the task was for, when its trace recorded one.
+	Ticket *TicketPayload `json:"ticket,omitempty"`
+	// LastSeq is the highest event seq in the journal. Cloud compares it with
+	// what it holds to know whether there is anything left to pull.
+	LastSeq   uint64 `json:"lastSeq"`
+	StartedAt int64  `json:"startedAt"` // unix milliseconds, first event
+	UpdatedAt int64  `json:"updatedAt"` // unix milliseconds, latest change
+}
+
+// TaskHistoryParams is the optional Params of a task_history query. Limit
+// bounds the list; zero leaves it to the Runner.
+type TaskHistoryParams struct {
+	Limit int `json:"limit,omitempty"`
+}
+
+// TaskTraceParams is the Params of a task_trace query: one task's events after
+// AfterSeq, at most Limit of them (zero means all). Paging is by seq, which is
+// what the journal is ordered by.
+type TaskTraceParams struct {
+	TaskID   string `json:"taskId"`
+	AfterSeq uint64 `json:"afterSeq,omitempty"`
+	Limit    int    `json:"limit,omitempty"`
+}
+
+// TraceEvent is one journalled event as a task_trace query returns it: a
+// TaskEvent with the seq and time the journal gave it.
+type TraceEvent struct {
+	Seq     uint64          `json:"seq"`
+	Event   EventKind       `json:"event"`
+	Payload json.RawMessage `json:"payload,omitempty"`
+	TS      int64           `json:"ts"` // unix milliseconds
+}
+
 // QueryResult answers a Query. Data holds the payload shaped by the Query's
 // What; Error explains an unsuccessful one.
 type QueryResult struct {
