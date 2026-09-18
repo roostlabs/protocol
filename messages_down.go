@@ -27,9 +27,15 @@ type HelloErr struct {
 
 // Ticket identifies the work item a task came from.
 //
-// Title and Body carry the ticket's text, because the Runner has no connector
-// to the task manager: it holds the repository credential, not the Jira or
-// Linear one. Cloud reads the ticket and sends what the agent has to act on.
+// Title and Body carry the ticket's text when Cloud has it, so a Runner with no
+// tracker connector can still act on it. A Runner that does have one — the
+// tracker credential lives on the VPS, like the git one — reads the text itself
+// when both are empty, and reports back to the ticket when the task ends.
+//
+// Provider is "manual" for a ticket typed into the dashboard, or a tracker's
+// name ("jira", "linear"). It is how the Runner knows whether the ticket is its
+// tracker's to read and update: a manual ticket is nobody's, whatever its id
+// looks like.
 type Ticket struct {
 	Provider string `json:"provider"`
 	ID       string `json:"id"`
