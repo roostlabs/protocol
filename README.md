@@ -66,5 +66,10 @@ Consumed as a versioned Go module — depend on a tag, not on `main`.
 
 ## Status
 
-Draft v0.1. Nothing consumes it yet; `runner` is next. Open questions are listed
-at the end of `PROTOCOL.md`.
+Version 1 of the wire contract, tagged as the Go module evolves (`v0.5.0` at the
+time of writing). Consumed by [roostlabs/runner](https://github.com/roostlabs/runner)
+and by Cloud. Open questions are listed at the end of `PROTOCOL.md`.
+
+## License
+
+Apache-2.0. See `LICENSE`.
