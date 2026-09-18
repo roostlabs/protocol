@@ -60,7 +60,7 @@
 | `hello` | handshake | див. §3 |
 | `status` | стан Runner'а (періодично + при зміні) | `state: idle\|busy`, `activeTasks[]`, `queuedTasks` |
 | `metrics` | телеметрія хоста/контейнерів (кожні ~5с, коли є підписник) | `host:{cpu,mem,disk,load}`, `sandboxes:[{taskId,cpuPct,memMb}]` |
-| `task.event` | подія трейсу виконання (append-only) | `event: stage\|agent_step\|cmd_start\|cmd_output\|cmd_exit\|llm_call\|pr\|error` + payload події |
+| `task.event` | подія трейсу виконання (append-only) | `event: ticket\|stage\|agent_step\|cmd_start\|cmd_output\|cmd_exit\|llm_call\|pr\|error` + payload події. `ticket` — на старті задачі з тікетом, коли текст уже прочитано: `{provider,id,url?,title?}`, без `body`; так Cloud дізнається про задачу, яку Runner запустив сам (поллінг трекера) |
 | `task.state` | зміна стану задачі | `state: queued\|preparing\|running\|awaiting_approval\|done\|failed\|cancelled`, `reason?` |
 | `task.result` | фінал задачі | `prUrl?`, `costUsd`, `tokens:{in,out}`, `durationMs` |
 | `cred.status` | які креди налаштовані (тільки прапорці!) + режим | `{git:true, taskManager:false, llm:true, mode: local\|managed}` |
