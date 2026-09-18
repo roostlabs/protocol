@@ -81,7 +81,7 @@
 | `repo.prepare` | клонувати/оновити репу | `url`, `branch?` |
 | `cred.set` | **тільки Managed-режим**: записати кред у локальний конфіг | `key: git\|taskManager\|llm`, `value` (relay-only, не логується; порожній = стерти слот) |
 | `chat` | повідомлення від дева до агента | `taskId`, `text` |
-| `query` | одноразовий запит (історія, диск, конфіг) | `queryId`, `what: task_history\|task_trace\|disk_usage\|config`, `params` |
+| `query` | одноразовий запит (історія, диск, конфіг) | `queryId`, `what: task_history\|task_trace\|disk_usage\|config`, `params`. `task_history`: params `{limit?}` → `[{taskId,state,reason?,result?,ticket?,lastSeq,startedAt,updatedAt}]`, найсвіжіші першими. `task_trace`: params `{taskId,afterSeq?,limit?}` → `[{seq,event,payload,ts}]` за зростанням `seq` |
 | `subscribe` / `unsubscribe` | вкл/викл потік `metrics` (щоб не слати даремно) | `stream: metrics` |
 | `runner.update` | запросити self-update | `version` |
 
@@ -91,6 +91,7 @@
 - Події `task.event` при обриві **буферизуються локально** (вони й так пишуться в SQLite event-store) і дозаливаються після reconnect: Cloud у `hello.ok` повертає `lastSeq` по активних задачах, Runner шле все, що новіше.
 - Команди вниз при офлайн-Runner'і: Cloud відповідає дашборду `runner_offline` — **не** зберігає чергу команд (крім явно позначених `queued:true`, TTL 10 хв).
 - Задачі **переживають обрив каналу**: sandbox продовжує працювати без зв'язку з Cloud; канал — це спостереження/керування, не життєзабезпечення.
+- Реплей по `lastSeq` покриває лише задачі, які Cloud уже тримає. Задачу, що почалась і завершилась поки Cloud був недоступний (зокрема запущену Runner'ом самостійно з поллінгу трекера), Cloud дізнається з `query: task_history` після підключення, а її трейс тягне `task_trace` за потреби. Стан і результат задачі Runner тримає в журналі поруч із подіями — інакше історії не було б звідки взяти.
 
 ## 7. Помилки
 
@@ -115,4 +116,4 @@
 - [ ] Чи потрібен binary frame для великих `cmd_output` чанків (зараз JSON+base64 досить)?
 - [ ] E2E-шифрування `cred.set` ключем Runner'а (щоб Cloud технічно не міг прочитати) — v2?
 - [ ] Rate limits на `task.event` (флуд-захист від зацикленого агента) — на боці Runner чи Cloud?
-- [ ] Формат `task_trace` пагінації для довгих задач.
+- [x] Формат `task_trace` пагінації для довгих задач — `afterSeq` + `limit`, порядок за `seq` (див. §5).
