@@ -65,7 +65,9 @@ type TaskCancel struct {
 }
 
 // TaskApprove answers a task parked in TaskAwaitingApproval. StepID is the one
-// from the AgentStepPayload that asked.
+// from the AgentStepPayload that asked, as repeated in the TaskState; empty
+// means whichever step the task is waiting on, for a Cloud that learnt of the
+// wait from task_history rather than from the live state.
 type TaskApprove struct {
 	TaskID   string `json:"taskId"`
 	StepID   string `json:"stepId"`

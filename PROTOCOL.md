@@ -61,7 +61,7 @@
 | `status` | стан Runner'а (періодично + при зміні) | `state: idle\|busy`, `activeTasks[]`, `queuedTasks` |
 | `metrics` | телеметрія хоста/контейнерів (кожні ~5с, коли є підписник) | `host:{cpu,mem,disk,load}`, `sandboxes:[{taskId,cpuPct,memMb}]` |
 | `task.event` | подія трейсу виконання (append-only) | `event: ticket\|stage\|agent_step\|cmd_start\|cmd_output\|cmd_exit\|llm_call\|pr\|error` + payload події. `ticket` — на старті задачі з тікетом, коли текст уже прочитано: `{provider,id,url?,title?}`, без `body`; так Cloud дізнається про задачу, яку Runner запустив сам (поллінг трекера) |
-| `task.state` | зміна стану задачі | `state: queued\|preparing\|running\|awaiting_approval\|done\|failed\|cancelled`, `reason?` |
+| `task.state` | зміна стану задачі | `state: queued\|preparing\|running\|awaiting_approval\|done\|failed\|cancelled`, `reason?`, `stepId?` (лише з `awaiting_approval`: крок `agent_step`, що чекає відповіді) |
 | `task.result` | фінал задачі | `prUrl?`, `costUsd`, `tokens:{in,out}`, `durationMs` |
 | `cred.status` | які креди налаштовані (тільки прапорці!) + режим | `{git:true, taskManager:false, llm:true, mode: local\|managed}` |
 | `repo.status` | стан підготовлених реп | `[{repo, branch, lastFetch, dirty}]` |
@@ -77,7 +77,7 @@
 | `hello.ok` / `hello.err` | handshake | див. §3 |
 | `task.run` | запустити задачу | `taskId`, `ticket:{provider,id,url?,title?,body?}`, `repo`, `budgetUsd?`, `timeoutMs?` |
 | `task.cancel` | зупинити задачу (вбити sandbox) | `taskId`, `reason` |
-| `task.approve` | апрув кроку (human-in-the-loop) | `taskId`, `stepId`, `approved: bool` |
+| `task.approve` | апрув кроку (human-in-the-loop) | `taskId`, `stepId` (із `task.state`; порожній = той крок, на якому задача стоїть — для Cloud, що дізнався про очікування з `task_history`), `approved: bool`. Runner, що увімкнув апрув PR, перед `push` ставить задачу в `awaiting_approval` і чекає; відмова = задача `failed`, PR не відкривається |
 | `repo.prepare` | клонувати/оновити репу | `url`, `branch?` |
 | `cred.set` | **тільки Managed-режим**: записати кред у локальний конфіг | `key: git\|taskManager\|llm`, `value` (relay-only, не логується; порожній = стерти слот) |
 | `chat` | повідомлення від дева до агента | `taskId`, `text` |

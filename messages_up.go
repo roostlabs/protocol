@@ -195,10 +195,13 @@ const (
 )
 
 // TaskState announces a lifecycle transition. Reason is set for the states where
-// "why" is not obvious, chiefly TaskFailed and TaskCancelled.
+// "why" is not obvious, chiefly TaskFailed and TaskCancelled. StepID is set
+// with TaskAwaitingApproval and names the AgentStepPayload that is waiting,
+// so a TaskApprove can refer back to it.
 type TaskState struct {
 	State  TaskStatus `json:"state"`
 	Reason string     `json:"reason,omitempty"`
+	StepID string     `json:"stepId,omitempty"`
 }
 
 // TaskResult closes a task out. PRURL is empty when the task failed before
